@@ -12,10 +12,342 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ================= ENUMS =================
+
+enum Role {
+  CUSTOMER
+  OWNER
+  MANAGER
+  SUPERADMIN
+}
+
+enum StationStatus {
+  ACTIVE
+  INACTIVE
+  MAINTENANCE
+  CLOSED
+}
+
+enum BookingStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum BookingType {
+  PREBOOK
+  WALKIN
+  INTERNAL_SLOT
+}
+
+enum PaymentMode {
+  CASH
+  CREDIT_CARD
+  UPI
+  NET_BANKING
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+}
+
+enum NotificationType {
+  PUSH
+  EMAIL
+  SMS
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum InviteStatus {
+  PENDING
+  JOINED
+  REJECTED
+}
+
+// ================= USER =================
+
 model User {
-  user_id  String   @id @default(uuid()) @db.VarChar(36)
-  name     String   @db.VarChar(255)
-  phone    String   @unique @db.VarChar(15)
+  user_id      String   @id @default(uuid()) @db.VarChar(36)
+
+  first_name   String   @db.VarChar(100)
+  last_name    String?   @db.VarChar(100)
+
+// Remember to enforce the presence of atleast one of phone_number or email in the service layer
+  phone_number String?  @unique @db.VarChar(15)
+  email        String?  @unique @db.VarChar(255)
+
+  address      String?   @db.VarChar(500)
+  govt_id      String   @unique @db.VarChar(100)
+  password     String   @db.VarChar(255)
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([phone_number])
+  @@index([email])
+
+  // UserRole
+  roles UserRole[]
+
+  // Station / Booking / Payment
+  stationsOwned Station[]
+  bookings      Booking[]
+  payments      Payment[]
+
+  // Notifications
+  sentNotifications     Notification[] @relation("Sender")
+  receivedNotifications Notification[] @relation("Receiver")
+
+  // Station Requests
+  stationRequests StationRequest[]
+
+  // Manager Invites
+  ownedInvites   ManagerInvite[]        // owner side
+  managerInvites ManagerInvite[] @relation("ManagerInvites")
+
+  // Manager Join Requests
+  ownerRequests ManagerJoinRequest[] @relation("OwnerRequests")
+  userRequests  ManagerJoinRequest[] @relation("UserRequests")
+}
+
+// ================= USER ROLES =================
+
+model UserRole {
+  id        String   @id @default(uuid()) @db.VarChar(36)
+
+  user_id   String   @db.VarChar(36)
+  role      Role
+
+  user      User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([user_id, role])
+  @@index([user_id])
+}
+
+
+// ================= STATION =================
+
+model Station {
+  station_id String @id @default(uuid()) @db.VarChar(36)
+
+  owner_id String
+  name     String
+  address  String
+
+  latitude  Float
+  longitude Float
+
+  helpline_number String
+
+  documents Json   // array
+  working_days Json// array
+
+  opensAt  String
+  closesAt String
+
+  status     StationStatus
+  approvedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  owner    User     @relation(fields: [owner_id], references: [user_id])
+  machines Machine[]
+
+  managerInvites   ManagerInvite[]
+  managerRequests  ManagerJoinRequest[]
+
+  @@index([owner_id])
+}
+
+// ================= MACHINE =================
+
+model Machine {
+  machine_id String @id @default(uuid()) @db.VarChar(36)
+
+  station_id String
+
+  machine_code String
+  machine_type String
+  license      String
+
+  minimum_fee Float
+  fee_per_hour Float
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  station  Station  @relation(fields: [station_id], references: [station_id], onDelete: Cascade)
+  bookings Booking[]
+
+  @@index([station_id])
+}
+
+// ================= BOOKING =================
+
+model Booking {
+  booking_id String @id @default(uuid()) @db.VarChar(36)
+
+  user_id    String
+  machine_id String
+
+  start_time DateTime
+  end_time   DateTime?
+  date       DateTime
+
+  charges Float
+
+  payment_id String?
+
+  status       BookingStatus
+  booking_type BookingType
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user    User    @relation(fields: [user_id], references: [user_id])
+  machine Machine @relation(fields: [machine_id], references: [machine_id])
+
+  payment Payment?
+
+  @@index([user_id])
+  @@index([machine_id])
+}
+
+// ================= PAYMENT =================
+
+model Payment {
+  payment_id String @id @default(uuid()) @db.VarChar(36)
+
+  user_id    String
+  booking_id String @unique
+
+  amount Float
+
+  mode   PaymentMode
+  status PaymentStatus
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user    User    @relation(fields: [user_id], references: [user_id])
+  booking Booking @relation(fields: [booking_id], references: [booking_id])
+
+  @@index([user_id])
+}
+
+// ================= NOTIFICATION =================
+
+model Notification {
+  notification_id String @id @default(uuid()) @db.VarChar(36)
+
+  sender_id   String
+  receiver_id String?
+
+  title   String
+  content String
+
+  type NotificationType
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  sender   User  @relation("Sender", fields: [sender_id], references: [user_id])
+  receiver User? @relation("Receiver", fields: [receiver_id], references: [user_id])
+
+  @@index([sender_id])
+  @@index([receiver_id])
+}
+
+// ================= STATION REQUEST =================
+
+model StationRequest {
+  request_id String @id @default(uuid()) @db.VarChar(36)
+
+  owner_id String
+
+  station_name String
+  latitude     Float
+  longitude    Float
+  address      String
+
+  helpline_number String
+
+  documents Json
+  working_days Json
+
+  opensAt  String
+  closesAt String
+
+  status RequestStatus
+
+  reviewed_by String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  owner User @relation(fields: [owner_id], references: [user_id])
+
+  @@index([owner_id])
+}
+
+// ================= MANAGER INVITES =================
+
+model ManagerInvite {
+  invite_id String @id @default(uuid()) @db.VarChar(36)
+
+  station_id String
+  owner_id   String
+  manager_id String?
+
+  status InviteStatus
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  station Station @relation(fields: [station_id], references: [station_id], onDelete: Cascade)
+  owner   User    @relation(fields: [owner_id], references: [user_id])
+  manager User?   @relation("ManagerInvites", fields: [manager_id], references: [user_id])
+
+  @@index([station_id])
+}
+
+// ================= MANAGER JOIN REQUEST =================
+
+model ManagerJoinRequest {
+  request_id String @id @default(uuid()) @db.VarChar(36)
+
+  station_id String
+  owner_id   String
+  user_id    String
+
+  status RequestStatus
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  station Station @relation(fields: [station_id], references: [station_id], onDelete: Cascade)
+  owner   User    @relation("OwnerRequests", fields: [owner_id], references: [user_id])
+  user    User    @relation("UserRequests", fields: [user_id], references: [user_id])
+
+  @@index([station_id])
+  @@index([user_id])
 }
