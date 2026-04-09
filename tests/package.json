@@ -1,0 +1,21 @@
+{
+  "name": "sd-group-project-tests",
+  "version": "1.0.0",
+  "description": "Integration and unit tests for SD Group Project",
+
+  "scripts": {
+    "pretest": "npx prisma generate --schema=../backend/prisma/schema.prisma",
+    "test": "jest --verbose",
+    "test:integration": "npx prisma generate --schema=../backend/prisma/schema.prisma && jest --testPathPattern=backend/integration_tests --verbose"
+  },
+  "devDependencies": {
+    "@prisma/client": "^5.22.0",
+    "prisma": "^5.22.0",
+    "dotenv": "^17.4.1",
+    "jest": "^29.7.0",
+    "@jest/globals": "^29.7.0",
+    "@babel/core": "^7.24.0",
+    "@babel/preset-env": "^7.24.0",
+    "babel-jest": "^29.7.0"
+  }
+}
