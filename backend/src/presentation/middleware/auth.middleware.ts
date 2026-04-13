@@ -10,15 +10,17 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
     const token =
       req.cookies?.accessToken ||
       req.header("Authorization")?.replace("Bearer ", "");
-
+      // console.log(req.cookies);
     if (!token) {
       throw new AppError("Invalid credentials", 401);
     }
-
+    
     const decodedToken = jwt.verify(token, config.jwt.secret) as JwtPayload;
 
     const userRepository = new UserRepository();
     const user = await userRepository.findById(decodedToken.userId);
+    // console.log("Decoded token:", decodedToken);
+    // console.log("Authenticated user:", user);
 
     if (!user) {
       throw new AppError("Unauthorized", 401);

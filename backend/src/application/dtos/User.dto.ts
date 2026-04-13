@@ -23,5 +23,6 @@ export interface UpdateUserdto {
     phoneNumber?: string;
     address?: string;
     govtId?: string;
+    password?: string;
     refreshToken?: string;
 }
