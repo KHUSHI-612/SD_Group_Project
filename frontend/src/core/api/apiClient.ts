@@ -1,16 +1,7 @@
-export class ApiClient {
-  private static instance: ApiClient;
+class ApiClient {
+  private readonly baseUrl = "http://localhost:8000/api";
 
-  private constructor(private readonly baseUrl: string) {}
-
-  public static getInstance(): ApiClient {
-    if (!ApiClient.instance) {
-      ApiClient.instance = new ApiClient("http://localhost:8000/api");
-    }
-    return ApiClient.instance;
-  }
-
-  public async get<T>(path: string): Promise<T> {
+  async get<T>(path: string): Promise<T> {
     const response = await fetch(`${this.baseUrl}${path}`, {
       method: "GET",
       credentials: "include",
@@ -25,11 +16,22 @@ export class ApiClient {
     return data;
   }
 
-  public async post<T>(path: string, body: BodyInit): Promise<T> {
+  async post<T>(
+    path: string,
+    body?: FormData | Record<string, unknown>
+  ): Promise<T> {
+    const isFormData = body instanceof FormData;
+
     const response = await fetch(`${this.baseUrl}${path}`, {
       method: "POST",
-      body,
       credentials: "include",
+      headers: isFormData ? undefined : { "Content-Type": "application/json" },
+      body:
+        body === undefined
+          ? undefined
+          : isFormData
+          ? body
+          : JSON.stringify(body),
     });
 
     const data = await response.json();
@@ -42,4 +44,4 @@ export class ApiClient {
   }
 }
 
-export const apiClient = ApiClient.getInstance();
+export const apiClient = new ApiClient();
