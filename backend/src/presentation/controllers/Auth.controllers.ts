@@ -95,5 +95,64 @@ export class AuthController {
       next(error);
     }
 
+  };
+
+  logout = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const user = (req as any).user;
+      if (!user) {
+        throw new AppError("Unauthorized", 401);
+      }
+      await this.authService.logout(user);
+      res
+        .status(200)
+        .clearCookie("accessToken")
+        .clearCookie("refreshToken")
+        .json(new AppResponse(200, null, "User logged out successfully"));
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getMe = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const user = (req as any).user;
+      if (!user) {
+        throw new AppError("Unauthorized", 401);
+      }
+      res
+        .status(200)
+        .json(new AppResponse(200, user, "User data retrieved successfully"));
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  changePassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || currentPassword.trim().length < 6) {
+      throw new AppError("Current password must be at least 6 characters long");
+    } else if (!newPassword || newPassword.trim().length < 6) {
+      throw new AppError("New password must be at least 6 characters long");
+    } else if (currentPassword === newPassword) {
+      throw new AppError("New password must be different from current password");
+    }
+
+    try {
+      const user = (req as any).user;
+      // console.log("Authenticated user for password change:", user);
+      if (!user) {
+        throw new AppError("Unauthorized", 401);
+      }
+      await this.authService.changePassword(user, currentPassword, newPassword);
+      res
+        .status(200)
+        .clearCookie("accessToken")
+        .clearCookie("refreshToken")
+        .json(new AppResponse(200, null, "Password changed successfully, Please Login again"));
+    } catch (error) {
+      next(error);
+    }
   }
 }

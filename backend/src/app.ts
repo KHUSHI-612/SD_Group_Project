@@ -5,6 +5,7 @@ import { config } from "./config/env.config.js";
 import { errorHandler } from "./presentation/middleware/error.middleware.js";
 import { AppResponse } from "./shared/response/AppResponse.js";
 import authRoutes from "./presentation/routes/auth.routes.js";
+import cookieParser from "cookie-parser";
 
 export default class App {
   public app: Application;
@@ -28,6 +29,9 @@ export default class App {
     // Body parsers
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
+
+    // Cookies
+    this.app.use(cookieParser());
 
     // Logging for development
     // if (config.nodeEnv === "development") {

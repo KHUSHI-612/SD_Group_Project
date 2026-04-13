@@ -60,15 +60,15 @@ export class AuthService {
       refreshToken: "", // Placeholder, will be updated after token generation
     });
 
-    const tokens = this.generateTokens(newUser.id);
+    const tokens = await this.generateTokens(newUser.id);
 
     return { user: newUser, tokens };
   }
 
-  private generateTokens(userId: string): {
+  private async generateTokens(userId: string): Promise<{
     accessToken: string;
     refreshToken: string;
-  } {
+  }> {
     try {
       const accessToken = jwt.sign({ userId }, this.getJwtSecret(), {
         expiresIn: config.jwt.accessTokenExpiry as any,
@@ -76,7 +76,7 @@ export class AuthService {
       const refreshToken = jwt.sign({ userId }, this.getJwtSecret(), {
         expiresIn: config.jwt.refreshTokenExpiry as any,
       });
-      const user = this.userRepository.update(userId, { refreshToken });
+      const user = await this.userRepository.update(userId, { refreshToken });
 
       return { accessToken, refreshToken };
     } catch (error) {
@@ -118,7 +118,7 @@ export class AuthService {
       throw new AppError("Invalid credentials", 401);
     }
 
-    const tokens = this.generateTokens(result?.user.id);
+    const tokens = await this.generateTokens(result?.user.id);
 
     const user = await this.userRepository.findById(result!.user.id);
 
@@ -126,5 +126,33 @@ export class AuthService {
       throw new AppError("User not found after authentication", 404);
     }
     return { user: user!, tokens };
+  }
+
+  async logout(user: UserEntity): Promise<void> {
+    await this.userRepository.update(String(user.id), { refreshToken: "" });
+  }
+
+  async changePassword(user: UserEntity, currentPassword: string, newPassword: string): Promise<void> {
+    let userData: { user: UserEntity; hashedPassword: string } | null = null;
+    // console.log("User:", user);
+    if(user.email) {
+      userData = await this.userRepository.findAuthByEmail(user.email!);
+    } else if(user.phoneNumber) {
+      userData = await this.userRepository.findAuthByPhone(user.phoneNumber!);
+    }
+
+    // console.log("User data for password change:", userData);
+
+    const passwordMatch = await bcrypt.compare(currentPassword, userData!.hashedPassword);
+
+    if (!passwordMatch) {
+      throw new AppError("Invalid credentials", 401);
+    }
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, this.SALT_ROUNDS);
+
+    await this.userRepository.update(userData!.user.id, { password: hashedNewPassword });
+
+    await this.logout(userData!.user);
   }
 }
