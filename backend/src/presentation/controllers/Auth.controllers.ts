@@ -95,5 +95,22 @@ export class AuthController {
       next(error);
     }
 
+  };
+
+  logout = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const user = (req as any).user;
+      if (!user) {
+        throw new AppError("Unauthorized", 401);
+      }
+      await this.authService.logout(user);
+      res
+        .status(200)
+        .clearCookie("accessToken")
+        .clearCookie("refreshToken")
+        .json(new AppResponse(200, null, "User logged out successfully"));
+    } catch (error) {
+      next(error);
+    }
   }
 }

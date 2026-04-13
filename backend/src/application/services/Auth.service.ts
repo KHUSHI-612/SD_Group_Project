@@ -127,4 +127,8 @@ export class AuthService {
     }
     return { user: user!, tokens };
   }
+
+  async logout(user: UserEntity): Promise<void> {
+    await this.userRepository.update(String(user.id), { refreshToken: "" });
+  }
 }
