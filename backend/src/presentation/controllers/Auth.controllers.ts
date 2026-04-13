@@ -65,4 +65,35 @@ export class AuthController {
       next(error);
     }
   };
+
+  login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const {email, phoneNumber, password} = req.body;
+
+    if (!email?.trim() && !phoneNumber?.trim()) {
+      throw new AppError("Either email or phone number must be provided");
+    } else if (!password || password?.trim().length < 6) {
+      throw new AppError("Password must be at least 6 characters long");
+    }
+
+    const loginUserDto = {
+      email,
+      phoneNumber,
+      password
+    }
+
+    try {
+      const result = await this.authService.login(loginUserDto);
+
+      res
+        .status(200)
+        .cookie("accessToken", result.tokens.accessToken, { httpOnly: true })
+        .cookie("refreshToken", result.tokens.refreshToken, { httpOnly: true })
+        .json(
+          new AppResponse(200, result.user, "User logged in successfully"),
+        );
+    } catch (error) {
+      next(error);
+    }
+
+  }
 }

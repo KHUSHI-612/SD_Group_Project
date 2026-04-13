@@ -8,7 +8,7 @@ const authController = new AuthController();
 
 // Public routes
 router.post('/register', upload.single('govtId'), authController.register);
-// router.post('/login',  authController.login);
+router.post('/login',  authController.login);
 
 // Protected routes
 // router.get('/me', authenticate, authController.getMe);

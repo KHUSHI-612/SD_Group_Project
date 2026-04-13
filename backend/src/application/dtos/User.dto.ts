@@ -10,11 +10,18 @@ export interface RegisterUserdto {
     password: string;
 }
 
-export interface UpdateUserDto {
+export interface LoginUserdto {
+    email?: string;
+    phoneNumber?: string;
+    password: string;
+}
+
+export interface UpdateUserdto {
     firstName?: string;
     lastName?: string;
     email?: string;
     phoneNumber?: string;
     address?: string;
     govtId?: string;
+    refreshToken?: string;
 }

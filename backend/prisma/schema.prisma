@@ -86,7 +86,7 @@ model User {
   address      String?   @db.VarChar(500)
   govt_id      String   @unique @db.VarChar(100)
   password     String   @db.VarChar(255)
-  refreshToken String
+  refreshToken String   @db.Text
 
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
