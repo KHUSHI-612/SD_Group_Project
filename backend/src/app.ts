@@ -6,6 +6,7 @@ import { errorHandler } from "./presentation/middleware/error.middleware.js";
 import { AppResponse } from "./shared/response/AppResponse.js";
 import authRoutes from "./presentation/routes/auth.routes.js";
 import userRoutes from "./presentation/routes/user.routes.js";
+import stationRequestRoutes from "./presentation/routes/stationRequest.routes.js";
 import cookieParser from "cookie-parser";
 
 export default class App {
@@ -61,6 +62,7 @@ export default class App {
     // Application Routes to be defined here
     this.app.use('/api/auth', authRoutes);
     this.app.use('/api/user', userRoutes);
+    this.app.use('/api/station-request', stationRequestRoutes);
 
     // 404 Route Handle - If the request doesnot match any defined routes
     this.app.use((_req: Request, res: Response) => {

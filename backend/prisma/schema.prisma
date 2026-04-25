@@ -108,9 +108,6 @@ model User {
   sentNotifications     Notification[] @relation("Sender")
   receivedNotifications Notification[] @relation("Receiver")
 
-  // Station Requests
-  stationRequests StationRequest[]
-
   // Manager Invites
   ownedInvites   ManagerInvite[]        // owner side
   managerInvites ManagerInvite[] @relation("ManagerInvites")
@@ -118,6 +115,10 @@ model User {
   // Manager Join Requests
   ownerRequests ManagerJoinRequest[] @relation("OwnerRequests")
   userRequests  ManagerJoinRequest[] @relation("UserRequests")
+
+  // Station Requests 
+  stationsRequested StationRequest[] @relation("StationOwner")
+  reviewedStations  StationRequest[] @relation("StationReviewer")
 }
 
 // ================= USER ROLES =================
@@ -172,6 +173,7 @@ model Station {
   managerRequests  ManagerJoinRequest[]
 
   @@index([owner_id])
+  @@unique([owner_id, name])
 }
 
 // ================= MACHINE =================
@@ -309,9 +311,11 @@ model StationRequest {
   updatedAt DateTime @updatedAt
 
   // Relations
-  owner User @relation(fields: [owner_id], references: [user_id])
+  owner User @relation("StationOwner", fields: [owner_id], references: [user_id])
+  reviewer User? @relation("StationReviewer", fields: [reviewed_by], references: [user_id])
 
   @@index([owner_id])
+  @@unique([owner_id, station_name])
 }
 
 // ================= MANAGER INVITES =================
