@@ -3,7 +3,7 @@ import DatabaseClient from "../database/prisma.client.js";
 import { StationRequestEntity } from "../../core/entities/StationRequest.entity.js";
 import type { CreateRequestdto, UpdateRequestdto } from "../../application/dtos/StationRequest.dto.js";
 import { RequestStatus } from "@prisma/client";
-import type { Prisma, PrismaClient } from "@prisma/client";
+import type { DBTransactionClient } from "../../shared/types/prisma/index.js";
 
 export class StationRequestRepository implements IStationRequestRepository {
     private prisma = DatabaseClient.getInstance();
@@ -122,7 +122,7 @@ export class StationRequestRepository implements IStationRequestRepository {
         )
     }
 
-    async update(id: string, data: UpdateRequestdto, tx?: PrismaClient | Prisma.TransactionClient): Promise<StationRequestEntity | null> {
+    async update(id: string, data: UpdateRequestdto, tx?: DBTransactionClient): Promise<StationRequestEntity | null> {
         const client = tx || this.prisma;
         const request = await client.stationRequest.update({
             where: {

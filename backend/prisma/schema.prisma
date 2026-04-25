@@ -71,6 +71,11 @@ enum InviteStatus {
   REJECTED
 }
 
+enum StationMemberRole {
+  OWNER
+  MANAGER
+}
+
 // ================= USER =================
 
 model User {
@@ -119,6 +124,9 @@ model User {
   // Station Requests 
   stationsRequested StationRequest[] @relation("StationOwner")
   reviewedStations  StationRequest[] @relation("StationReviewer")
+
+  // Station Members
+  stationMembers StationMember[]
 }
 
 // ================= USER ROLES =================
@@ -171,6 +179,9 @@ model Station {
 
   managerInvites   ManagerInvite[]
   managerRequests  ManagerJoinRequest[]
+
+  // Station Members
+  stationMembers StationMember[]
 
   @@index([owner_id])
   @@unique([owner_id, name])
@@ -358,6 +369,26 @@ model ManagerJoinRequest {
   station Station @relation(fields: [station_id], references: [station_id], onDelete: Cascade)
   owner   User    @relation("OwnerRequests", fields: [owner_id], references: [user_id])
   user    User    @relation("UserRequests", fields: [user_id], references: [user_id])
+
+  @@index([station_id])
+  @@index([user_id])
+}
+
+// ================= STATION MEMBER =================
+
+model StationMember {
+  member_id String @id @default(uuid()) @db.VarChar(36)
+
+  station_id String
+  user_id    String
+  role       StationMemberRole
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  station Station @relation(fields: [station_id], references: [station_id], onDelete: Cascade)
+  user    User    @relation(fields: [user_id], references: [user_id])
 
   @@index([station_id])
   @@index([user_id])

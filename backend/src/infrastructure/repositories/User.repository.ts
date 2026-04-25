@@ -7,7 +7,7 @@ import type {
   UpdateUserdto,
 } from "../../application/dtos/User.dto.js";
 import { Role } from "@prisma/client";
-import type { Prisma, PrismaClient } from "@prisma/client";
+import type { DBTransactionClient } from "../../shared/types/prisma/index.js";
 
 export class UserRepository implements IUserRepository {
   private prisma = DatabaseClient.getInstance();
@@ -276,7 +276,7 @@ export class UserRepository implements IUserRepository {
     return user?.refreshToken ?? null;
   }
 
-  async assignRole(user_id: string, role: Role, tx?: PrismaClient | Prisma.TransactionClient): Promise<UserRole | null> {
+  async assignRole(user_id: string, role: Role, tx?: DBTransactionClient): Promise<UserRole | null> {
     const client = tx || this.prisma;
     const userRole = await client.userRole.create({
       data: {
@@ -291,7 +291,7 @@ export class UserRepository implements IUserRepository {
     }
   }
 
-  async getUserRole(user_id: string, tx?: PrismaClient | Prisma.TransactionClient): Promise<Role[]> {
+  async getUserRole(user_id: string, tx?: DBTransactionClient): Promise<Role[]> {
       const client = tx || this.prisma;
       const userRoles = await client.userRole.findMany({
         where: {

@@ -2,7 +2,7 @@ import { AppError } from "../../shared/error/AppError.js";
 import type { CreateRequestdto, UpdateRequestdto } from "../dtos/StationRequest.dto.js";
 import DatabaseClient from "../../infrastructure/database/prisma.client.js";
 import { Role } from "@prisma/client";
-import type { Prisma, PrismaClient } from "@prisma/client";
+import type { DBTransactionClient } from "../../shared/types/prisma/index.js";
 import { StationService } from "./Station.service.js";
 import type { IStationRequestRepository } from "../../core/interfaces/IStationRequestRepository.js";
 import type { IUserRepository } from "../../core/interfaces/IUserRepository.js";
@@ -228,7 +228,7 @@ export class StationRequestService {
 
     const prisma = DatabaseClient.getInstance();
 
-    const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    const result = await prisma.$transaction(async (tx: DBTransactionClient) => {
       const newStation = await this.stationService.create({
         owner_id: record.owner_id,
         name: record.station_name,
