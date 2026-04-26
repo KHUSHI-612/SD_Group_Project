@@ -24,7 +24,7 @@ export const signupSchema = z
     password: z
       .string()
       .min(6, "Password must be at least 6 characters long"),
-    govtId: z.instanceof(File, { message: "Identity proof is required" }),
+    govt_id: z.instanceof(File, { message: "Identity proof is required" }),
   })
   .refine((data) => !!data.email || !!data.phoneNumber, {
     message: "Either email or phone number is required",
