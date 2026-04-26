@@ -1,5 +1,6 @@
 import { Bell, Search } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import HomeRolePill from "./HomeRolePill";
 
 export default function HomeHeader() {
   const { user } = useAuth();
@@ -37,7 +38,7 @@ export default function HomeHeader() {
           />
         </div>
 
-        <button className="grid h-11 w-11 place-items-center rounded-2xl border border-white/10 bg-white/5 text-slate-300">
+        <button className="grid h-11 w-11 place-items-center rounded-2xl border border-white/10 bg-white/5 text-slate-300 transition hover:bg-white/10">
           <Bell className="h-4 w-4" />
         </button>
 
@@ -46,9 +47,11 @@ export default function HomeHeader() {
             {initials}
           </div>
 
-          <p className="text-sm font-semibold text-white">
+          <p className="text-sm font-semibold text-white whitespace-nowrap">
             {firstName} {lastName}
           </p>
+
+          <HomeRolePill />
         </div>
       </div>
     </div>

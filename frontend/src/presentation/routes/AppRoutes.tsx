@@ -9,9 +9,10 @@ import SuperAdminRequestsPage from "../pages/SuperAdminRequestsPage";
 import StationListPage from "../pages/StationListPage";
 import StationDetailsPage from "../pages/StationDetailsPage";
 import BookingPage from "../pages/BookingPage";
-import ProtectedRoute from "../routes/ProtectedRoute";
-import { useAuth } from "../context/AuthContext";
 import MyBookingsPage from "../pages/MyBookingsPage";
+import ProtectedRoute from "../routes/ProtectedRoute";
+import RoleRoute from "./RoleRoute";
+import { useAuth } from "../context/AuthContext";
 
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -74,37 +75,14 @@ export default function AppRoutes() {
         />
 
         <Route
-          path="/apply-station"
-          element={
-            <ProtectedRoute>
-              <ApplyStationPage />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/my-station-requests"
-          element={
-            <ProtectedRoute>
-              <MyStationRequestsPage />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/admin/station-requests"
-          element={
-            <ProtectedRoute>
-              <SuperAdminRequestsPage />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
           path="/stations"
           element={
             <ProtectedRoute>
-              <StationListPage />
+              <RoleRoute
+                allowedRoles={["CUSTOMER", "OWNER", "MANAGER", "SUPERADMIN"]}
+              >
+                <StationListPage />
+              </RoleRoute>
             </ProtectedRoute>
           }
         />
@@ -113,7 +91,11 @@ export default function AppRoutes() {
           path="/stations/:stationId"
           element={
             <ProtectedRoute>
-              <StationDetailsPage />
+              <RoleRoute
+                allowedRoles={["CUSTOMER", "OWNER", "MANAGER", "SUPERADMIN"]}
+              >
+                <StationDetailsPage />
+              </RoleRoute>
             </ProtectedRoute>
           }
         />
@@ -122,7 +104,9 @@ export default function AppRoutes() {
           path="/stations/:stationId/book"
           element={
             <ProtectedRoute>
-              <BookingPage />
+              <RoleRoute allowedRoles={["CUSTOMER", "OWNER", "MANAGER"]}>
+                <BookingPage />
+              </RoleRoute>
             </ProtectedRoute>
           }
         />
@@ -131,7 +115,42 @@ export default function AppRoutes() {
           path="/my-bookings"
           element={
             <ProtectedRoute>
-              <MyBookingsPage />
+              <RoleRoute allowedRoles={["CUSTOMER", "OWNER", "MANAGER"]}>
+                <MyBookingsPage />
+              </RoleRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/apply-station"
+          element={
+            <ProtectedRoute>
+              <RoleRoute allowedRoles={["OWNER"]}>
+                <ApplyStationPage />
+              </RoleRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/my-station-requests"
+          element={
+            <ProtectedRoute>
+              <RoleRoute allowedRoles={["OWNER"]}>
+                <MyStationRequestsPage />
+              </RoleRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/station-requests"
+          element={
+            <ProtectedRoute>
+              <RoleRoute allowedRoles={["SUPERADMIN"]}>
+                <SuperAdminRequestsPage />
+              </RoleRoute>
             </ProtectedRoute>
           }
         />

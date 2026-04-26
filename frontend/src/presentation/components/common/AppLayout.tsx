@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { useRoleView, type ActiveRole } from "../../context/RoleViewContext";
+import RoleSwitcher from "./RoleSwitcher";
 
 type AppLayoutProps = {
   children: React.ReactNode;
@@ -20,6 +22,58 @@ type SideNavItemProps = {
   label: string;
   active?: boolean;
 };
+
+type NavItem = {
+  label: string;
+  icon: React.ElementType;
+  path: string;
+  roles: ActiveRole[];
+};
+
+const navItems: NavItem[] = [
+  {
+    label: "Home",
+    icon: Home,
+    path: "/home",
+    roles: ["CUSTOMER", "OWNER", "MANAGER", "SUPERADMIN"],
+  },
+  {
+    label: "Stations",
+    icon: MapPinned,
+    path: "/stations",
+    roles: ["CUSTOMER", "OWNER", "MANAGER", "SUPERADMIN"],
+  },
+  {
+    label: "Apply Station",
+    icon: Plus,
+    path: "/apply-station",
+    roles: ["OWNER"],
+  },
+  {
+    label: "My Requests",
+    icon: LayoutDashboard,
+    path: "/my-station-requests",
+    roles: ["OWNER"],
+  },
+  {
+    label: "My Bookings",
+    icon: CalendarClock,
+    path: "/my-bookings",
+    roles: ["CUSTOMER", "OWNER", "MANAGER"],
+  },
+  {
+    label: "Admin Requests",
+    icon: Settings,
+    path: "/admin/station-requests",
+    roles: ["SUPERADMIN"],
+  },
+  {
+    label: "Profile",
+    icon: Settings,
+    path: "/profile",
+    roles: ["CUSTOMER", "OWNER", "MANAGER", "SUPERADMIN"],
+  },
+];
 
 function ElectrifyLogo({ className = "h-9 w-9" }: { className?: string }) {
   return (
@@ -76,28 +130,11 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout } = useAuth();
+  const { activeRole } = useRoleView();
 
-  const navItems = [
-    { label: "Home", icon: Home, path: "/home" },
-    { label: "Stations", icon: MapPinned, path: "/stations" },
-    { label: "Apply Station", icon: Plus, path: "/apply-station" },
-    {
-      label: "My Requests",
-      icon: LayoutDashboard,
-      path: "/my-station-requests",
-    },
-    {
-      label: "My Bookings",
-      icon: CalendarClock,
-      path: "/my-bookings",
-    },
-    {
-      label: "Admin Requests",
-      icon: Settings,
-      path: "/admin/station-requests",
-    },
-    { label: "Profile", icon: Settings, path: "/profile" },
-  ];
+  const visibleNavItems = navItems.filter((item) =>
+    item.roles.includes(activeRole),
+  );
 
   return (
     <div className="min-h-screen bg-[#050B16] text-white">
@@ -108,7 +145,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
         <div className="relative mx-auto flex min-h-screen max-w-[1600px] gap-6 p-4 lg:p-6">
           <aside className="hidden w-[280px] shrink-0 rounded-[32px] border border-white/10 bg-white/[0.04] p-5 backdrop-blur-xl lg:flex lg:flex-col">
-            <div className="mb-8 flex items-center gap-3 px-2">
+            <div className="mb-5 flex items-center gap-3 px-2">
               <div className="grid h-11 w-11 place-items-center rounded-2xl border border-cyan-400/20 bg-white/5 shadow-[0_0_30px_rgba(34,199,255,0.12)]">
                 <ElectrifyLogo className="h-8 w-8" />
               </div>
@@ -123,8 +160,12 @@ export default function AppLayout({ children }: AppLayoutProps) {
               </div>
             </div>
 
+            <div className="mb-4">
+              <RoleSwitcher />
+            </div>
+
             <div className="space-y-2">
-              {navItems.map((item) => (
+              {visibleNavItems.map((item) => (
                 <button
                   key={item.path}
                   type="button"

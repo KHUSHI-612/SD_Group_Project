@@ -8,8 +8,9 @@ import {
   Plus,
   Settings,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { useRoleView, type ActiveRole } from "../../context/RoleViewContext";
 import ElectrifyLogo from "./ElectrifyLogo";
 import VehicleMiniCard, { type VehicleItem } from "./VehicleMiniCard";
 
@@ -25,6 +26,58 @@ type SideNavItemProps = {
   active?: boolean;
   onClick?: () => void;
 };
+
+type NavItem = {
+  label: string;
+  icon: React.ElementType;
+  path: string;
+  roles: ActiveRole[];
+};
+
+const navItems: NavItem[] = [
+  {
+    label: "Home",
+    icon: Home,
+    path: "/home",
+    roles: ["CUSTOMER", "OWNER", "MANAGER", "SUPERADMIN"],
+  },
+  {
+    label: "Stations",
+    icon: MapPinned,
+    path: "/stations",
+    roles: ["CUSTOMER", "OWNER", "MANAGER", "SUPERADMIN"],
+  },
+  {
+    label: "Apply Station",
+    icon: Plus,
+    path: "/apply-station",
+    roles: ["OWNER"],
+  },
+  {
+    label: "My Requests",
+    icon: LayoutDashboard,
+    path: "/my-station-requests",
+    roles: ["OWNER"],
+  },
+  {
+    label: "My Bookings",
+    icon: CalendarClock,
+    path: "/my-bookings",
+    roles: ["CUSTOMER", "OWNER", "MANAGER"],
+  },
+  {
+    label: "Admin Requests",
+    icon: Settings,
+    path: "/admin/station-requests",
+    roles: ["SUPERADMIN"],
+  },
+  {
+    label: "Settings",
+    icon: Settings,
+    path: "/profile",
+    roles: ["CUSTOMER", "OWNER", "MANAGER", "SUPERADMIN"],
+  },
+];
 
 function SideNavItem({
   icon: Icon,
@@ -58,7 +111,13 @@ function SideNavItem({
 
 export default function HomeSidebar() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { logout } = useAuth();
+  const { activeRole } = useRoleView();
+
+  const visibleNavItems = navItems.filter((item) =>
+    item.roles.includes(activeRole)
+  );
 
   return (
     <aside className="hidden w-[255px] shrink-0 rounded-[30px] border border-white/10 bg-white/[0.04] p-4 backdrop-blur-xl xl:flex xl:flex-col">
@@ -76,48 +135,15 @@ export default function HomeSidebar() {
       </div>
 
       <div className="space-y-2">
-        <SideNavItem
-          icon={Home}
-          label="Home"
-          active
-          onClick={() => navigate("/home")}
-        />
-
-        <SideNavItem
-          icon={MapPinned}
-          label="Stations"
-          onClick={() => navigate("/stations")}
-        />
-
-        <SideNavItem
-          icon={Plus}
-          label="Apply Station"
-          onClick={() => navigate("/apply-station")}
-        />
-
-        <SideNavItem
-          icon={LayoutDashboard}
-          label="My Requests"
-          onClick={() => navigate("/my-station-requests")}
-        />
-
-        <SideNavItem
-          icon={CalendarClock}
-          label="My Bookings"
-          onClick={() => navigate("/my-bookings")}
-        />
-
-        <SideNavItem
-          icon={Settings}
-          label="Admin Requests"
-          onClick={() => navigate("/admin/station-requests")}
-        />
-
-        <SideNavItem
-          icon={Settings}
-          label="Settings"
-          onClick={() => navigate("/profile")}
-        />
+        {visibleNavItems.map((item) => (
+          <SideNavItem
+            key={item.path}
+            icon={item.icon}
+            label={item.label}
+            active={location.pathname === item.path}
+            onClick={() => navigate(item.path)}
+          />
+        ))}
 
         <SideNavItem
           icon={LogOut}
