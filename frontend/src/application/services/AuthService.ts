@@ -4,11 +4,11 @@ import { User } from "../../domain/models/User";
 
 type RawUser = {
   id: string;
-  firstName: string;
-  lastName: string | null;
-  email: string | null;
-  phoneNumber: string | null;
-  address: string | null;
+  firstName?: string;
+  lastName?: string | null;
+  email?: string | null;
+  phoneNumber?: string | null;
+  address?: string | null;
 };
 
 type ApiResponse<T> = {
@@ -24,19 +24,6 @@ type LoginPayload = {
   password: string;
 };
 
-type ChangePasswordPayload = {
-  currentPassword: string;
-  newPassword: string;
-};
-
-type UpdateProfilePayload = {
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  phoneNumber?: string;
-  address?: string;
-};
-
 export class AuthService {
   async register(formData: FormData): Promise<User> {
     const response = await apiClient.post<ApiResponse<RawUser>>(
@@ -47,31 +34,55 @@ export class AuthService {
     return UserFactory.create(response.data);
   }
 
-  async login(credentials: LoginPayload): Promise<User> {
+  async login(payload: LoginPayload): Promise<User> {
     const response = await apiClient.post<ApiResponse<RawUser>>(
       "/auth/login",
-      credentials
+      {
+        email: payload.email,
+        phoneNumber: payload.phoneNumber,
+        password: payload.password,
+      }
     );
 
     return UserFactory.create(response.data);
   }
 
   async getCurrentUser(): Promise<User> {
-    const response = await apiClient.get<ApiResponse<RawUser>>("/auth/me");
+    const response =
+      await apiClient.get<ApiResponse<RawUser>>("/auth/me");
+
     return UserFactory.create(response.data);
   }
 
   async logout(): Promise<void> {
-    await apiClient.post<ApiResponse<null>>("/auth/logout", {});
+    await apiClient.post("/auth/logout", {});
   }
 
-  async changePassword(payload: ChangePasswordPayload): Promise<void> {
-    await apiClient.post<ApiResponse<null>>("/auth/change-password", payload);
+  async refreshTokens(): Promise<void> {
+    await apiClient.post("/auth/refresh-tokens", {});
   }
 
-  async updateProfile(payload: UpdateProfilePayload): Promise<User> {
+  async changePassword(payload: {
+    currentPassword: string;
+    newPassword: string;
+  }): Promise<void> {
+    await apiClient.patch("/auth/change-password", payload);
+  }
+
+  async deactivateAccount(): Promise<void> {
+    await apiClient.delete("/auth/deactivate-account");
+  }
+
+  async activateAccount(payload: {
+    email?: string;
+    phoneNumber?: string;
+  }): Promise<void> {
+    await apiClient.patch("/auth/activate-account", payload);
+  }
+
+  async updateProfile(payload: Record<string, unknown>): Promise<User> {
     const response = await apiClient.patch<ApiResponse<RawUser>>(
-      "/user/update-profile",
+      "/user/profile",
       payload
     );
 
@@ -82,9 +93,6 @@ export class AuthService {
     const formData = new FormData();
     formData.append("govt_id", file);
 
-    await apiClient.patch<ApiResponse<null>>(
-      "/user/upload-govt-id",
-      formData
-    );
+    await apiClient.patch("/user/govt-id", formData);
   }
 }

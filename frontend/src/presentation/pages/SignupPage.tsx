@@ -10,7 +10,7 @@ const authService = new AuthService();
 
 type SignupErrors = Partial<
   Record<
-    "firstName" | "email" | "phoneNumber" | "password" | "govtId" | "form",
+    "firstName" | "email" | "phoneNumber" | "password" | "govt_id" | "form",
     string
   >
 >;
@@ -33,7 +33,7 @@ export default function SignupPage() {
     const form = e.currentTarget;
     const formData = new FormData(form);
 
-    const govtIdFile = formData.get("govtId");
+    const govtIdFile = formData.get("govt_id");
 
     const values = {
       firstName: String(formData.get("firstName") || ""),
@@ -42,7 +42,10 @@ export default function SignupPage() {
       phoneNumber: String(formData.get("phoneNumber") || ""),
       address: String(formData.get("address") || ""),
       password: String(formData.get("password") || ""),
-      govtId: govtIdFile instanceof File && govtIdFile.size > 0 ? govtIdFile : undefined,
+      govt_id:
+        govtIdFile instanceof File && govtIdFile.size > 0
+          ? govtIdFile
+          : undefined,
     };
 
     const parsed = signupSchema.safeParse(values);
@@ -54,7 +57,7 @@ export default function SignupPage() {
         email: errors.email?.[0],
         phoneNumber: errors.phoneNumber?.[0],
         password: errors.password?.[0],
-        govtId: errors.govtId?.[0],
+        govt_id: errors.govt_id?.[0],
       });
       setSubmitting(false);
       return;
@@ -164,7 +167,7 @@ export default function SignupPage() {
                 <label className="flex h-10 w-full cursor-pointer items-center justify-center rounded-xl border border-dashed border-slate-500/40 bg-slate-950/70 px-4 text-sm text-slate-400 hover:border-blue-400/60 hover:text-slate-200">
                   {fileName}
                   <input
-                    name="govtId"
+                    name="govt_id"
                     type="file"
                     className="hidden"
                     onChange={(e) => {
@@ -173,8 +176,8 @@ export default function SignupPage() {
                     }}
                   />
                 </label>
-                {fieldErrors.govtId && (
-                  <p className="mt-1 text-sm text-red-300">{fieldErrors.govtId}</p>
+                {fieldErrors.govt_id && (
+                  <p className="mt-1 text-sm text-red-300">{fieldErrors.govt_id}</p>
                 )}
               </div>
 
