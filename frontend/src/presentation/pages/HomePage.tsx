@@ -1,16 +1,21 @@
-import { useState } from "react";
 import HomeSidebar from "../components/home/HomeSidebar";
 import HomeHeader from "../components/home/HomeHeader";
-import ChargeTrendCard from "../components/home/ChargeTrendCard";
-import TripPlannerCard from "../components/home/TripPlannerCard";
-import TripSummaryCard from "../components/home/TripSummaryCard";
-import VehicleOverviewCard from "../components/home/VehicleOverviewCard";
-import CommuteChartCard from "../components/home/CommuteChartCard";
-import NearbyStationsSection from "../components/home/NearbyStationsSection";
-import type { PlannedTrip } from "../components/home/homeTypes";
+import CustomerDashboard from "../components/home/roleDashboards/CustomerDashboard";
+import OwnerDashboard from "../components/home/roleDashboards/OwnerDashboard";
+import ManagerDashboard from "../components/home/roleDashboards/ManagerDashboard";
+import SuperAdminDashboard from "../components/home/roleDashboards/SuperAdminDashboard";
+import { useRoleView } from "../context/RoleViewContext";
 
 export default function HomePage() {
-  const [plannedTrip, setPlannedTrip] = useState<PlannedTrip | null>(null);
+  const { activeRole } = useRoleView();
+
+  const renderDashboard = () => {
+    if (activeRole === "OWNER") return <OwnerDashboard />;
+    if (activeRole === "MANAGER") return <ManagerDashboard />;
+    if (activeRole === "SUPERADMIN") return <SuperAdminDashboard />;
+
+    return <CustomerDashboard />;
+  };
 
   return (
     <div className="min-h-screen bg-[#050B16] text-white">
@@ -24,22 +29,7 @@ export default function HomePage() {
 
           <main className="min-w-0 flex-1">
             <HomeHeader />
-
-            <div className="grid gap-5 2xl:grid-cols-[1.2fr_0.8fr_0.9fr]">
-              <ChargeTrendCard />
-
-              <div className="space-y-5">
-                <TripPlannerCard onTripPlanned={setPlannedTrip} />
-                <TripSummaryCard plannedTrip={plannedTrip} />
-              </div>
-
-              <div className="space-y-5">
-                <VehicleOverviewCard />
-                <CommuteChartCard />
-              </div>
-            </div>
-
-            <NearbyStationsSection />
+            {renderDashboard()}
           </main>
         </div>
       </div>

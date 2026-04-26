@@ -8,7 +8,6 @@ import {
   ShieldCheck,
   User,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { AuthService } from "../../application/services/AuthService";
 import AppLayout from "../components/common/AppLayout";
@@ -64,7 +63,6 @@ function InputField({
 }
 
 export default function ProfilePage() {
-  const navigate = useNavigate();
   const { user, setUser } = useAuth();
 
   const [firstName, setFirstName] = useState(user?.firstName || "");
