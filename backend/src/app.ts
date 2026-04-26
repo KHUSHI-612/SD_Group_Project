@@ -24,7 +24,14 @@ export default class App {
     // CORS
     this.app.use(
       cors({
-        origin: config.cors.origin,
+        origin: (origin, callback) => {
+          if (!origin || config.cors.origins.includes(origin)) {
+            callback(null, true);
+            return;
+          }
+
+          callback(new Error(`CORS blocked for origin: ${origin}`));
+        },
         credentials: true,
       }),
     );

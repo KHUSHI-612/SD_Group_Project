@@ -4,7 +4,7 @@ export interface Config {
     nodeEnv: string;
     databaseUrl?: string;
     cors: {
-        origin: string;
+        origins: string[];
     };
     cloudinary: {
         cloudName?: string;

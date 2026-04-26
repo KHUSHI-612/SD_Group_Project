@@ -5,6 +5,20 @@ import {StringValue} from "ms";
 // Load environment variables
 dotenv.config();
 
+const defaultCorsOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "https://electrify.1forge.in",
+  "https://electrifylive.1forge.in",
+];
+
+const corsOriginsFromEnv = (
+  process.env.FRONTEND_URLS || process.env.FRONTEND_URL || ""
+)
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 export const config: Config = {
   // Server
   port: parseInt(process.env.PORT || "8000", 10),
@@ -15,7 +29,7 @@ export const config: Config = {
 
   // CORS
   cors: {
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origins: [...new Set([...defaultCorsOrigins, ...corsOriginsFromEnv])],
   },
 
   // Cloudinary

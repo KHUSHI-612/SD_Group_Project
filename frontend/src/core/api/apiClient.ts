@@ -1,5 +1,6 @@
 class ApiClient {
-  private readonly baseUrl = "http://localhost:8000/api";
+  // private readonly baseUrl = "http://localhost:8000/api";
+  private readonly baseUrl = import.meta.env.VITE_API_URL || "/api";
 
   async get<T>(path: string): Promise<T> {
     const response = await fetch(`${this.baseUrl}${path}`, {

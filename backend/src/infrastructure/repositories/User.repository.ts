@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import type { IUserRepository } from "../../core/interfaces/IUserRepository.js";
 import DatabaseClient from "../database/prisma.client.js";
 import { UserEntity } from "../../core/entities/User.entity.js";
