@@ -10,7 +10,7 @@ const authService = new AuthService();
 
 type SignupErrors = Partial<
   Record<
-    "firstName" | "email" | "phoneNumber" | "password" | "govt_id" | "form",
+    "first_name" | "email" | "phone_number" | "password" | "govt_id" | "form",
     string
   >
 >;
@@ -53,9 +53,9 @@ export default function SignupPage() {
     if (!parsed.success) {
       const errors = parsed.error.flatten().fieldErrors;
       setFieldErrors({
-        firstName: errors.first_name?.[0],
+        first_name: errors.first_name?.[0],
         email: errors.email?.[0],
-        phoneNumber: errors.phone_number?.[0],
+        phone_number: errors.phone_number?.[0],
         password: errors.password?.[0],
         govt_id: errors.govt_id?.[0],
       });
@@ -64,17 +64,7 @@ export default function SignupPage() {
     }
 
     try {
-      // Remap camelCase form fields to snake_case keys the backend expects
-      const apiFormData = new FormData();
-      apiFormData.append("first_name", values.firstName);
-      if (values.lastName) apiFormData.append("last_name", values.lastName);
-      apiFormData.append("email", values.email);
-      apiFormData.append("phone_number", values.phoneNumber);
-      if (values.address) apiFormData.append("address", values.address);
-      apiFormData.append("password", values.password);
-      if (govtIdFile instanceof File) apiFormData.append("govt_id", govtIdFile);
-
-      const user = await authService.register(apiFormData);
+      const user = await authService.register(formData);
       setUser(user);
       navigate("/home", { replace: true });
     } catch (err) {
@@ -117,8 +107,10 @@ export default function SignupPage() {
                   placeholder="First Name"
                   className="text-sm h-10 w-full rounded-xl border border-slate-400/15 bg-slate-950/95 px-4 text-white outline-none placeholder:text-slate-400 focus:border-blue-400/70 focus:ring-4 focus:ring-blue-500/10"
                 />
-                {fieldErrors.firstName && (
-                  <p className="mt-1 text-sm text-red-300">{fieldErrors.firstName}</p>
+                {fieldErrors.first_name && (
+                  <p className="mt-1 text-sm text-red-300">
+                    {fieldErrors.first_name}
+                  </p>
                 )}
               </div>
 
@@ -138,7 +130,9 @@ export default function SignupPage() {
                   className="text-sm h-10 w-full rounded-xl border border-slate-400/15 bg-slate-950/95 px-4 text-white outline-none placeholder:text-slate-400 focus:border-blue-400/70 focus:ring-4 focus:ring-blue-500/10"
                 />
                 {fieldErrors.email && (
-                  <p className="mt-1 text-sm text-red-300">{fieldErrors.email}</p>
+                  <p className="mt-1 text-sm text-red-300">
+                    {fieldErrors.email}
+                  </p>
                 )}
               </div>
 
@@ -148,8 +142,10 @@ export default function SignupPage() {
                   placeholder="Phone Number"
                   className="text-sm h-10 w-full rounded-xl border border-slate-400/15 bg-slate-950/95 px-4 text-white outline-none placeholder:text-slate-400 focus:border-blue-400/70 focus:ring-4 focus:ring-blue-500/10"
                 />
-                {fieldErrors.phoneNumber && (
-                  <p className="mt-1 text-sm text-red-300">{fieldErrors.phoneNumber}</p>
+                {fieldErrors.phone_number && (
+                  <p className="mt-1 text-sm text-red-300">
+                    {fieldErrors.phone_number}
+                  </p>
                 )}
               </div>
 
@@ -169,7 +165,9 @@ export default function SignupPage() {
                   className="text-sm h-10 w-full rounded-xl border border-slate-400/15 bg-slate-950/95 px-4 text-white outline-none placeholder:text-slate-400 focus:border-blue-400/70 focus:ring-4 focus:ring-blue-500/10"
                 />
                 {fieldErrors.password && (
-                  <p className="mt-1 text-sm text-red-300">{fieldErrors.password}</p>
+                  <p className="mt-1 text-sm text-red-300">
+                    {fieldErrors.password}
+                  </p>
                 )}
               </div>
 
@@ -187,7 +185,9 @@ export default function SignupPage() {
                   />
                 </label>
                 {fieldErrors.govt_id && (
-                  <p className="mt-1 text-sm text-red-300">{fieldErrors.govt_id}</p>
+                  <p className="mt-1 text-sm text-red-300">
+                    {fieldErrors.govt_id}
+                  </p>
                 )}
               </div>
 
